@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
-	"flag"
 )
 
 func usage() {
@@ -19,8 +19,10 @@ func usage() {
 func main() {
 
 	var jsonText bytes.Buffer
+	var jsonFile string
 	flag.Usage = usage
 	flag.Parse()
+
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -29,15 +31,13 @@ func main() {
 		if err != nil {
 			break
 		}
-		err = json.Indent(&jsonText, line, "", "\t")
-		if err != nil {
-			// In case of json file, just print text as it is, excluding the blank lines
-			if len(line) == 0 {
-				continue
-			}
-			fmt.Println(string(line))
-		} else {
-			jsonText.WriteTo(os.Stdout)
-		}
+		jsonFile = jsonFile + string(line)
 	}
+	err := json.Indent(&jsonText, []byte(jsonFile), "", "\t")
+	if err != nil {
+		fmt.Println("BAD Json", jsonFile)
+	} else {
+		jsonText.WriteTo(os.Stdout)
+	}
+
 }
